@@ -31,3 +31,19 @@ verificationCodeView.setOnClickListener(new View.OnClickListener() {
 });
 
 ```
+
+####请求网络验证码时
+
+```
+<sgffsg.com.verifycodeview.VerificationCodeView
+    android:id="@+id/net_verifycodeview"
+    android:layout_width="100dp"
+    android:layout_height="40dp"
+    android:visibility="gone"
+    app:isNetCode="true"/>
+```
+
+
+Thanks
+
+[CaptchaImageView](https://github.com/jineshfrancs/CaptchaImageView)

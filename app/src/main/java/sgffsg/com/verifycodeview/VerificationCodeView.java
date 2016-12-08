@@ -1,6 +1,7 @@
 package sgffsg.com.verifycodeview;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -49,6 +50,7 @@ public class VerificationCodeView extends View {
     private int mWidth;
     //控件高度
     private int mHeight;
+    private boolean isInited=false;//是否初始化完成
 
     private Bitmap mbitmap;
     private Bitmap codebitmap;
@@ -58,6 +60,7 @@ public class VerificationCodeView extends View {
     private ArrayList<Path> mPaths = new ArrayList<Path>();
     private float offset=5;//扭曲偏移
     private String vCode;
+    private boolean isNetCode=false;//是否是网络请求到验证码
 
     public VerificationCodeView(Context context) {
         this(context,null);
@@ -69,6 +72,7 @@ public class VerificationCodeView extends View {
 
     public VerificationCodeView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        init(attrs);
         initView();
     }
 
@@ -102,7 +106,13 @@ public class VerificationCodeView extends View {
         mBounds=new RectF(getLeft(),getTop(),getRight(),getBottom());
         mWidth= (int) (mBounds.right-mBounds.left);
         mHeight= (int) (mBounds.bottom-mBounds.top);
+        isInited=true;
         createCodeBitmap();
+    }
+
+    private void init(AttributeSet attrs) {
+        TypedArray typedArray = getContext().obtainStyledAttributes(attrs, R.styleable.VerificationCodeView);
+        isNetCode = typedArray.getBoolean(R.styleable.VerificationCodeView_isNetCode,false);
     }
 
     /**
@@ -143,6 +153,8 @@ public class VerificationCodeView extends View {
      * 生成验证码图片
      */
     private void createCodeBitmap() {
+        if (!isInited)
+            return;
         mPaths.clear();
         // 生成干扰线坐标
         for(int i=0;i<2;i++){
@@ -162,20 +174,20 @@ public class VerificationCodeView extends View {
         tempCode=getCharAndNumr();
         //画背景
         myCanvas.drawColor(YELLOW_BG_COLOR);
-
-        textPaint.getTextBounds(tempCode,0,codeNum,textBound);
-        float charLength=(textBound.width())/codeNum;
-        for (int i=0;i<codeNum;i++){
-            int offsetDegree=mRandom.nextInt(15);
-            // 这里只会产生0和1，如果是1那么正旋转正角度，否则旋转负角度
-            offsetDegree = mRandom.nextInt(2) == 1?offsetDegree:-offsetDegree;
-            myCanvas.save();
-            myCanvas.rotate(offsetDegree,mWidth/2,mHeight/2);
-            // 给画笔设置随机颜色，+20是为了去除一些边界值
-            textPaint.setARGB(255, mRandom.nextInt(200) + 20, mRandom.nextInt(200) + 20, mRandom.nextInt(200) + 20);
-            myCanvas.drawText(String.valueOf(tempCode.charAt(i)), i * charLength * 1.6f+30, mHeight * 2 / 3f, textPaint);
-            myCanvas.restore();
-
+        if (tempCode!=null&&tempCode.length()>0){
+            textPaint.getTextBounds(tempCode,0,codeNum,textBound);
+            float charLength=(textBound.width())/codeNum;
+            for (int i=0;i<codeNum;i++){
+                int offsetDegree=mRandom.nextInt(15);
+                // 这里只会产生0和1，如果是1那么正旋转正角度，否则旋转负角度
+                offsetDegree = mRandom.nextInt(2) == 1?offsetDegree:-offsetDegree;
+                myCanvas.save();
+                myCanvas.rotate(offsetDegree,mWidth/2,mHeight/2);
+                // 给画笔设置随机颜色，+20是为了去除一些边界值
+                textPaint.setARGB(255, mRandom.nextInt(200) + 20, mRandom.nextInt(200) + 20, mRandom.nextInt(200) + 20);
+                myCanvas.drawText(String.valueOf(tempCode.charAt(i)), i * charLength * 1.6f+30, mHeight * 2 / 3f, textPaint);
+                myCanvas.restore();
+            }
         }
         int index=0;
         float bitmapwidth= mbitmap.getWidth();
@@ -213,22 +225,26 @@ public class VerificationCodeView extends View {
      * @return 随机验证码
      */
     public String getCharAndNumr() {
-        String val = "";
-        Random random = new Random();
-        for (int i = 0; i < codeNum; i++) {
-            // 输出字母还是数字
-            String charOrNum = random.nextInt(2) % 2 == 0 ? "char" : "num";
-            // 字符串
-            if ("char".equalsIgnoreCase(charOrNum)) {
-                // 取得大写字母还是小写字母
-                int choice = random.nextInt(2) % 2 == 0 ? 65 : 97;
-                val += (char) (choice + random.nextInt(26));
-            } else if ("num".equalsIgnoreCase(charOrNum)) { // 数字
-                val += String.valueOf(random.nextInt(10));
+        if (isNetCode){
+            return vCode;
+        }else {
+            String val = "";
+            Random random = new Random();
+            for (int i = 0; i < codeNum; i++) {
+                // 输出字母还是数字
+                String charOrNum = random.nextInt(2) % 2 == 0 ? "char" : "num";
+                // 字符串
+                if ("char".equalsIgnoreCase(charOrNum)) {
+                    // 取得大写字母还是小写字母
+                    int choice = random.nextInt(2) % 2 == 0 ? 65 : 97;
+                    val += (char) (choice + random.nextInt(26));
+                } else if ("num".equalsIgnoreCase(charOrNum)) { // 数字
+                    val += String.valueOf(random.nextInt(10));
+                }
             }
+            vCode=val;
+            return val;
         }
-        vCode=val;
-        return val;
     }
 
     /**
@@ -245,5 +261,14 @@ public class VerificationCodeView extends View {
      */
     public String getvCode() {
         return vCode;
+    }
+
+    /**
+     * set verification code, code get from net work
+     * @return verification code
+     */
+    public void setvCode(String code) {
+        this.vCode=code;
+        refreshCode();
     }
 }
