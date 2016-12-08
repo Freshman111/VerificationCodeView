@@ -5,7 +5,7 @@ VerificationCode View
 可用于动态生成验证码，常见于金融类app
 
 ## App Preview
-![](art/verifycode.gif)
+![](art/verifycode.gif)<img src="art/01AA66503EDA243791DA1EBDA7360454.jpg" width="360" height="640" alt="jpg"/><img src="art/260F366BAC6DC71A05DFA8154A4A411E.png" width="360" height="640" alt="jpg"/>
 
 代码原理以及说明请看这一篇博客：
 [Android实现动态验证码的技术调研与实现](http://blog.csdn.net/dreamsever/article/details/53467708)
