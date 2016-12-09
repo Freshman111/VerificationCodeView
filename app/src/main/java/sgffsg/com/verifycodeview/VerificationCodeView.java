@@ -175,6 +175,7 @@ public class VerificationCodeView extends View {
         //画背景
         myCanvas.drawColor(YELLOW_BG_COLOR);
         if (tempCode!=null&&tempCode.length()>0){
+            textPaint.setTextSize(mWidth/3);
             textPaint.getTextBounds(tempCode,0,codeNum,textBound);
             float charLength=(textBound.width())/codeNum;
             for (int i=0;i<codeNum;i++){
@@ -185,7 +186,7 @@ public class VerificationCodeView extends View {
                 myCanvas.rotate(offsetDegree,mWidth/2,mHeight/2);
                 // 给画笔设置随机颜色，+20是为了去除一些边界值
                 textPaint.setARGB(255, mRandom.nextInt(200) + 20, mRandom.nextInt(200) + 20, mRandom.nextInt(200) + 20);
-                myCanvas.drawText(String.valueOf(tempCode.charAt(i)), i * charLength * 1.6f+30, mHeight * 2 / 3f, textPaint);
+                myCanvas.drawText(String.valueOf(tempCode.charAt(i)), i * charLength * 1.6f+20, mHeight * 2 / 3f, textPaint);
                 myCanvas.restore();
             }
         }
