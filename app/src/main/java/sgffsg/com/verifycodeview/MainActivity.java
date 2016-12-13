@@ -16,7 +16,7 @@ import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
 
-    private VerificationCodeView verificationCodeView,net_verificationCodeView;
+    private VerificationCodeView verificationCodeView,net_verificationCodeView,verificationCodeView2;
     private Button btnSubmit,btnNetSubmit;
     private EditText edit_input,net_edit_input;
     private ProgressBar progressBar;
@@ -60,6 +60,13 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 edit_input.setText("");
                 verificationCodeView.refreshCode();
+            }
+        });
+        verificationCodeView2= (VerificationCodeView) findViewById(R.id.verifycodeview2);
+        verificationCodeView2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                verificationCodeView2.refreshCode();
             }
         });
 

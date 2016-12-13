@@ -48,8 +48,11 @@ public class VerificationCodeView extends View {
 
     //控件总宽度
     private int mWidth;
+    private int dWidth;//真正可以绘制code的区域宽
     //控件高度
     private int mHeight;
+    private int dHeight;//真正可以绘制code的区域高
+    private int horizontalOffset=0;//水平方向的偏移，决定画笔开始的偏移量
     private boolean isInited=false;//是否初始化完成
 
     private Bitmap mbitmap;
@@ -104,8 +107,14 @@ public class VerificationCodeView extends View {
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
         mBounds=new RectF(getLeft(),getTop(),getRight(),getBottom());
-        mWidth= (int) (mBounds.right-mBounds.left);
-        mHeight= (int) (mBounds.bottom-mBounds.top);
+        mWidth=dWidth= (int) (mBounds.right-mBounds.left);
+        mHeight=dHeight= (int) (mBounds.bottom-mBounds.top);
+        if (mWidth*1.0/mHeight>5.0/2){
+            dWidth= (int) (mHeight*5.0/2);
+        } else if (mWidth*1.0/mHeight<5.0/2) {
+            dHeight= (int) (mWidth/5.0*2);
+        }
+        horizontalOffset=(mWidth-dWidth)/2;
         isInited=true;
         createCodeBitmap();
     }
@@ -175,7 +184,7 @@ public class VerificationCodeView extends View {
         //画背景
         myCanvas.drawColor(YELLOW_BG_COLOR);
         if (tempCode!=null&&tempCode.length()>0){
-            textPaint.setTextSize(mWidth/3);
+            textPaint.setTextSize(dWidth*0.3f);
             textPaint.getTextBounds(tempCode,0,codeNum,textBound);
             float charLength=(textBound.width())/codeNum;
             for (int i=0;i<codeNum;i++){
@@ -186,7 +195,7 @@ public class VerificationCodeView extends View {
                 myCanvas.rotate(offsetDegree,mWidth/2,mHeight/2);
                 // 给画笔设置随机颜色，+20是为了去除一些边界值
                 textPaint.setARGB(255, mRandom.nextInt(200) + 20, mRandom.nextInt(200) + 20, mRandom.nextInt(200) + 20);
-                myCanvas.drawText(String.valueOf(tempCode.charAt(i)), i * charLength * 1.6f+20, mHeight * 2 / 3f, textPaint);
+                myCanvas.drawText(String.valueOf(tempCode.charAt(i)), i * charLength * 1.6f+20+horizontalOffset, mHeight * 2 / 3f, textPaint);
                 myCanvas.restore();
             }
         }
