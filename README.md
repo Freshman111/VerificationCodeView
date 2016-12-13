@@ -10,6 +10,9 @@ VerificationCode View
 代码原理以及说明请看这一篇博客：
 [Android实现动态验证码的技术调研与实现](http://blog.csdn.net/dreamsever/article/details/53467708)
 
+建议将宽高比设置为5:2，如果不是5:2现在会按照5:2的比例居中显示到控件
+
+
 usage
 
 ```
