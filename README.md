@@ -50,3 +50,8 @@ verificationCodeView.setOnClickListener(new View.OnClickListener() {
 Thanks
 
 [CaptchaImageView](https://github.com/jineshfrancs/CaptchaImageView)
+
+
+##License
+---
+MIT
