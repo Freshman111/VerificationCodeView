@@ -1,5 +1,6 @@
 package sgffsg.com.verifycodeview;
 
+import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
@@ -17,7 +18,7 @@ import java.util.Random;
 public class MainActivity extends AppCompatActivity {
 
     private VerificationCodeView verificationCodeView,net_verificationCodeView,verificationCodeView2;
-    private Button btnSubmit,btnNetSubmit;
+    private Button btnSubmit,btnNetSubmit,btn_next;
     private EditText edit_input,net_edit_input;
     private ProgressBar progressBar;
     private FrameLayout netVcViewLayout;
@@ -39,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
         net_verificationCodeView = (VerificationCodeView) findViewById(R.id.net_verifycodeview);
         btnSubmit= (Button) findViewById(R.id.btn_submit);
         btnNetSubmit= (Button) findViewById(R.id.net_btn_submit);
+        btn_next= (Button) findViewById(R.id.btn_next_page);
         edit_input= (EditText) findViewById(R.id.edit_input);
         net_edit_input= (EditText) findViewById(R.id.net_edit_input);
         progressBar= (ProgressBar) findViewById(R.id.net_pregressbar);
@@ -62,13 +64,14 @@ public class MainActivity extends AppCompatActivity {
                 verificationCodeView.refreshCode();
             }
         });
-        verificationCodeView2= (VerificationCodeView) findViewById(R.id.verifycodeview2);
-        verificationCodeView2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                verificationCodeView2.refreshCode();
-            }
-        });
+        verificationCodeView.refreshCode();
+//        verificationCodeView2= (VerificationCodeView) findViewById(R.id.verifycodeview2);
+//        verificationCodeView2.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                verificationCodeView2.refreshCode();
+//            }
+//        });
 
         btnNetSubmit.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -89,6 +92,12 @@ public class MainActivity extends AppCompatActivity {
                 progressBar.setVisibility(View.VISIBLE);
                 net_verificationCodeView.setVisibility(View.GONE);
                 loadNetCode();
+            }
+        });
+        btn_next.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this,SecondActivity.class));
             }
         });
         loadNetCode();

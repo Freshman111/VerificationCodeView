@@ -14,8 +14,8 @@
     <sgffsg.com.verifycodeview.VerificationCodeView
         android:id="@+id/verifycodeview"
         android:layout_alignParentRight="true"
-        android:layout_width="80dp"
-        android:layout_height="40dp" />
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 
     <EditText
         android:id="@+id/edit_input"
@@ -29,7 +29,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="20dp"
         android:layout_below="@id/verifycodeview"
-        android:text="Submit"/>
+        android:text="@string/str_submit"/>
 
     <FrameLayout
         android:id="@+id/net_verifycodeview_layut"
@@ -63,12 +63,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/net_verifycodeview_layut"
-        android:text="Submit"/>
+        android:text="@string/str_submit"/>
 
-    <sgffsg.com.verifycodeview.VerificationCodeView
-        android:id="@+id/verifycodeview2"
-        android:layout_width="200dp"
-        android:layout_height="60dp"
-        android:layout_below="@id/net_btn_submit"/>
 
+    <Button
+        android:id="@+id/btn_next_page"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:text="@string/str_btn_next_page"/>
 </RelativeLayout>

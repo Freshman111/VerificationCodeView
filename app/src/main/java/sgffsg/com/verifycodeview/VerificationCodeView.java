@@ -10,6 +10,7 @@ import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -42,7 +43,8 @@ public class VerificationCodeView extends View {
     private Paint textPaint;
     private Paint linePaint;
 
-    private String tempCode;//当前生成的验证码
+    private float defaultTextSize=0;
+    private String tempCode="";//当前生成的验证码
     private int codeNum = 4;//验证码位数  4或6。。
     private Random mRandom;
 
@@ -54,6 +56,7 @@ public class VerificationCodeView extends View {
     private int dHeight;//真正可以绘制code的区域高
     private int horizontalOffset=0;//水平方向的偏移，决定画笔开始的偏移量
     private boolean isInited=false;//是否初始化完成
+    private boolean isWrapContent=true;//是否是WrapContent属性
 
     private Bitmap mbitmap;
     private Bitmap codebitmap;
@@ -83,45 +86,47 @@ public class VerificationCodeView extends View {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         //获取宽和高的SpecMode和SpecSize
-        int wSpecMode = MeasureSpec.getMode(widthMeasureSpec);
-        int wSpecSize = MeasureSpec.getSize(widthMeasureSpec);
-        int hSpecMode = MeasureSpec.getMode(heightMeasureSpec);
-        int hSpecSize = MeasureSpec.getSize(heightMeasureSpec);
+        int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+        int widthSize = MeasureSpec.getSize(widthMeasureSpec);
+        int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+        int heightSize = MeasureSpec.getSize(heightMeasureSpec);
 
-        //分别判断宽高是否设置为wrap_content
-        if (wSpecMode == MeasureSpec.AT_MOST && hSpecMode == MeasureSpec.AT_MOST) {
-            //宽高都为wrap_content,直接指定为400
-            setMeasuredDimension(mWidth, mWidth);
-
-        } else if (wSpecMode == MeasureSpec.AT_MOST) {
-            //只有宽为wrap_content,宽直接指定为400，高为获取的SpecSize
-            setMeasuredDimension(mWidth, hSpecSize);
-
-        } else if (hSpecMode == MeasureSpec.AT_MOST) {
-            //只有高为wrap_content,高直接指定为400，宽为获取的SpecSize
-            setMeasuredDimension(wSpecSize, mWidth);
+        if (widthMode == MeasureSpec.EXACTLY) {
+            // Parent has told us how big to be. So be it.
+            mWidth = widthSize;
+            isWrapContent=false;
+        } else {//没有设置宽度，先默认显示四个0的宽度
+            isWrapContent=true;
+            mWidth=(int)(textPaint.measureText("0")*1.5*codeNum+20+DisplayUtils.dpToPx(getContext(),8));
         }
+
+        if (heightMode == MeasureSpec.EXACTLY) {
+            // Parent has told us how big to be. So be it.
+            mHeight = heightSize;
+        }else {//没有设置高度，先默认显示40dp
+            mHeight= (int) DisplayUtils.dpToPx(getContext(),40);
+        }
+
+        setMeasuredDimension(mWidth, mHeight);
+
     }
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        mBounds=new RectF(getLeft(),getTop(),getRight(),getBottom());
-        mWidth=dWidth= (int) (mBounds.right-mBounds.left);
-        mHeight=dHeight= (int) (mBounds.bottom-mBounds.top);
-        if (mWidth*1.0/mHeight>5.0/2){
-            dWidth= (int) (mHeight*5.0/2);
-        } else if (mWidth*1.0/mHeight<5.0/2) {
-            dHeight= (int) (mWidth/5.0*2);
-        }
-        horizontalOffset=(mWidth-dWidth)/2;
+        horizontalOffset= (int) DisplayUtils.dpToPx(getContext(),2);
         isInited=true;
-        createCodeBitmap();
+        mbitmap = Bitmap.createBitmap(mWidth,mHeight, Bitmap.Config.ARGB_8888);
+        codebitmap = Bitmap.createBitmap(mWidth,mHeight, Bitmap.Config.ARGB_8888);
+        if (!TextUtils.isEmpty(tempCode)){
+            createCodeBitmap();
+        }
     }
 
     private void init(AttributeSet attrs) {
         TypedArray typedArray = getContext().obtainStyledAttributes(attrs, R.styleable.VerificationCodeView);
         isNetCode = typedArray.getBoolean(R.styleable.VerificationCodeView_isNetCode,false);
+        codeNum=typedArray.getInteger(R.styleable.VerificationCodeView_codeNumber,4);
     }
 
     /**
@@ -141,9 +146,10 @@ public class VerificationCodeView extends View {
         linePaint.setStrokeWidth(5);
         linePaint.setStrokeCap(Paint.Cap.ROUND);
 
+        defaultTextSize=DisplayUtils.spToPx(getContext(),30);
         textPaint=new Paint();
         textPaint.setAntiAlias(true);
-        textPaint.setTextSize(DisplayUtils.spToPx(getContext(),30));
+        textPaint.setTextSize(defaultTextSize);
         textPaint.setShadowLayer(5,3,3,0xFF999999);
         textPaint.setTypeface(Typeface.DEFAULT_BOLD);
         textPaint.setTextScaleX(0.8F);
@@ -165,6 +171,9 @@ public class VerificationCodeView extends View {
         if (!isInited)
             return;
         mPaths.clear();
+        if (!isWrapContent){
+            dynamicSetTextPaint(tempCode);
+        }
         // 生成干扰线坐标
         for(int i=0;i<2;i++){
             Path path = new Path();
@@ -176,15 +185,11 @@ public class VerificationCodeView extends View {
             path.quadTo(Math.abs(endX-startX)/2, Math.abs(endY-startY)/2,endX,endY);
             mPaths.add(path);
         }
-        mbitmap = Bitmap.createBitmap(mWidth,mHeight, Bitmap.Config.ARGB_8888);
-        codebitmap = Bitmap.createBitmap(mWidth,mHeight, Bitmap.Config.ARGB_8888);
         Canvas myCanvas=new Canvas(mbitmap);
         Canvas canvas=new Canvas(codebitmap);
-        tempCode=getCharAndNumr();
         //画背景
         myCanvas.drawColor(YELLOW_BG_COLOR);
         if (tempCode!=null&&tempCode.length()>0){
-            textPaint.setTextSize(dWidth*0.3f);
             textPaint.getTextBounds(tempCode,0,codeNum,textBound);
             float charLength=(textBound.width())/codeNum;
             for (int i=0;i<codeNum;i++){
@@ -195,9 +200,10 @@ public class VerificationCodeView extends View {
                 myCanvas.rotate(offsetDegree,mWidth/2,mHeight/2);
                 // 给画笔设置随机颜色，+20是为了去除一些边界值
                 textPaint.setARGB(255, mRandom.nextInt(200) + 20, mRandom.nextInt(200) + 20, mRandom.nextInt(200) + 20);
-                myCanvas.drawText(String.valueOf(tempCode.charAt(i)), i * charLength * 1.6f+20+horizontalOffset, mHeight * 2 / 3f, textPaint);
+                myCanvas.drawText(String.valueOf(tempCode.charAt(i)), i * charLength * 1.5f+20+horizontalOffset, mHeight * 2 / 3f, textPaint);
                 myCanvas.restore();
             }
+//            myCanvas.drawText(tempCode,0,mHeight*4f/5,textPaint);
         }
         int index=0;
         float bitmapwidth= mbitmap.getWidth();
@@ -231,11 +237,29 @@ public class VerificationCodeView extends View {
     }
 
     /**
+     * 根据可现实区域宽度以及验证码字数动态设置字体大小
+     * 以显示完全
+     */
+    private void dynamicSetTextPaint(String text){
+        int avaiWidth = (int) (mWidth*2.0f/3 - getPaddingLeft() - getPaddingRight() - DisplayUtils.dpToPx(getContext(), 2));
+        if (avaiWidth <= 0) {
+            return;
+        }
+        float trySize = defaultTextSize;
+        while (textPaint.measureText(text) > avaiWidth) {
+            trySize--;
+            textPaint.setTextSize(trySize);
+        }
+    }
+
+
+    /**
      * java生成随机数字和字母组合
      * @return 随机验证码
      */
     public String getCharAndNumr() {
         if (isNetCode){
+            codeNum=vCode!=null?vCode.length():0;
             return vCode;
         }else {
             String val = "";
@@ -261,9 +285,17 @@ public class VerificationCodeView extends View {
      * refresh verification Code
      */
     public void refreshCode(){
-        createCodeBitmap();
-        invalidate();
+        tempCode=getCharAndNumr();
+        if (tempCode==null||tempCode.length()<=0) {
+            return;
+        }
+        if (isInited){
+            createCodeBitmap();
+            requestLayout();
+            invalidate();
+        }
     }
+
 
     /**
      * get verification code
