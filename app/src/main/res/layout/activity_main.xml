@@ -14,7 +14,7 @@
     <sgffsg.com.verifycodeview.VerificationCodeView
         android:id="@+id/verifycodeview"
         android:layout_alignParentRight="true"
-        android:layout_width="wrap_content"
+        android:layout_width="80dp"
         android:layout_height="wrap_content" />
 
     <EditText
@@ -65,6 +65,11 @@
         android:layout_below="@id/net_verifycodeview_layut"
         android:text="@string/str_submit"/>
 
+    <sgffsg.com.verifycodeview.VerificationCodeView
+        android:id="@+id/verifycodeview2"
+        android:layout_width="200dp"
+        android:layout_height="60dp"
+        android:layout_below="@id/net_btn_submit"/>
 
     <Button
         android:id="@+id/btn_next_page"

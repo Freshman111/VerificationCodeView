@@ -65,13 +65,14 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         verificationCodeView.refreshCode();
-//        verificationCodeView2= (VerificationCodeView) findViewById(R.id.verifycodeview2);
-//        verificationCodeView2.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                verificationCodeView2.refreshCode();
-//            }
-//        });
+        verificationCodeView2= (VerificationCodeView) findViewById(R.id.verifycodeview2);
+        verificationCodeView2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                verificationCodeView2.refreshCode();
+            }
+        });
+        verificationCodeView2.refreshCode();
 
         btnNetSubmit.setOnClickListener(new View.OnClickListener() {
             @Override

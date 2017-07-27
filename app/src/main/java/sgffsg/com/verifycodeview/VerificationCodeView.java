@@ -44,6 +44,7 @@ public class VerificationCodeView extends View {
     private Paint linePaint;
 
     private float defaultTextSize=0;
+    private float maxTextSize=0;
     private String tempCode="";//当前生成的验证码
     private int codeNum = 4;//验证码位数  4或6。。
     private Random mRandom;
@@ -114,7 +115,6 @@ public class VerificationCodeView extends View {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        horizontalOffset= (int) DisplayUtils.dpToPx(getContext(),2);
         isInited=true;
         mbitmap = Bitmap.createBitmap(mWidth,mHeight, Bitmap.Config.ARGB_8888);
         codebitmap = Bitmap.createBitmap(mWidth,mHeight, Bitmap.Config.ARGB_8888);
@@ -146,6 +146,7 @@ public class VerificationCodeView extends View {
         linePaint.setStrokeWidth(5);
         linePaint.setStrokeCap(Paint.Cap.ROUND);
 
+        maxTextSize=DisplayUtils.spToPx(getContext(),50);
         defaultTextSize=DisplayUtils.spToPx(getContext(),30);
         textPaint=new Paint();
         textPaint.setAntiAlias(true);
@@ -173,6 +174,11 @@ public class VerificationCodeView extends View {
         mPaths.clear();
         if (!isWrapContent){
             dynamicSetTextPaint(tempCode);
+            float drawWidth=textPaint.measureText(tempCode)*3/2;
+            horizontalOffset= (int) ((mWidth-drawWidth-DisplayUtils.dpToPx(getContext(),8))/2);
+            if (horizontalOffset<0){
+                horizontalOffset=0;
+            }
         }
         // 生成干扰线坐标
         for(int i=0;i<2;i++){
@@ -203,7 +209,6 @@ public class VerificationCodeView extends View {
                 myCanvas.drawText(String.valueOf(tempCode.charAt(i)), i * charLength * 1.5f+20+horizontalOffset, mHeight * 2 / 3f, textPaint);
                 myCanvas.restore();
             }
-//            myCanvas.drawText(tempCode,0,mHeight*4f/5,textPaint);
         }
         int index=0;
         float bitmapwidth= mbitmap.getWidth();
